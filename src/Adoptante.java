@@ -25,12 +25,6 @@ public class Adoptante {
 
     @Override
     public String toString() {
-        return "Adoptante{" +
-                "nombre='" + nombre + '\'' +
-                ", DNI='" + dni + '\'' +
-                ", Teléfono='" + telefono + '\'' +
-                ", Email='" + email + '\'' +
-                ", Vivienda='" + perfilVivienda + '\'' +
-                '}';
+        return nombre + " | DNI: " + dni + " | Tel: " + telefono + " | Email: " + email + " | Vivienda: " + perfilVivienda;
     }
 }

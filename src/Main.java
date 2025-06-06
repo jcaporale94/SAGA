@@ -3,12 +3,7 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-
-        ConexionDB.crearTablaAnimal();
-        ConexionDB.crearTablaAdoptante();
-        ConexionDB.crearTablaSolicitudAdopcion();
-
-
+        ConexionDB.crearTablas();
 
         int opcion;
         do {
@@ -17,13 +12,15 @@ public class Main {
             System.out.println("2. Ver adoptantes");
             System.out.println("3. Insertar nuevo animal");
             System.out.println("4. Insertar nuevo adoptante");
-            System.out.println("5. Cargar datos de ejemplo");
-            System.out.println("6. Salir");
+            System.out.println("5. Registrar solicitud de adopción");
+            System.out.println("6. Ver adopciones confirmadas");
+            System.out.println("7. Cargar datos de prueba");
+            System.out.println("8. Salir");
             System.out.print("Elija una opción: ");
 
             if (scanner.hasNextInt()) {
                 opcion = scanner.nextInt();
-                scanner.nextLine(); // limpiar buffer
+                scanner.nextLine();
             } else {
                 System.out.println("❌ Ingrese un número válido.");
                 scanner.nextLine();
@@ -33,10 +30,10 @@ public class Main {
 
             switch (opcion) {
                 case 1:
-                    ConexionDB.listarAnimales();
+                    AnimalService.listarAnimales();
                     break;
                 case 2:
-                    ConexionDB.listarAdoptantes();
+                    AdoptanteService.listarAdoptantes();
                     break;
                 case 3:
                     System.out.print("Nombre: ");
@@ -56,7 +53,20 @@ public class Main {
                     System.out.print("Estado de salud: ");
                     String estadoSalud = leerSoloTexto(scanner);
 
-                    ConexionDB.insertarAnimal(nombreAnimal, especie, raza, edad, sexo, estadoSalud);
+                    System.out.print("Diagnóstico médico: ");
+                    String diagnostico = scanner.nextLine();
+
+                    System.out.print("Tratamiento médico: ");
+                    String tratamiento = scanner.nextLine();
+
+                    System.out.print("Observaciones de comportamiento: ");
+                    String comportamiento = scanner.nextLine();
+
+                    System.out.print("Nivel de sociabilidad: ");
+                    String nivelSociabilidad = leerSoloTexto(scanner);
+
+                    AnimalService.insertarAnimalCompleto(nombreAnimal, especie, raza, edad, sexo, estadoSalud,
+                            diagnostico, tratamiento, comportamiento, nivelSociabilidad);
                     break;
                 case 4:
                     System.out.print("Nombre: ");
@@ -65,7 +75,7 @@ public class Main {
                     String dni;
                     do {
                         System.out.print("DNI: ");
-                        dni = scanner.nextLine();
+                        dni = scanner.nextLine().trim();
                         if (!dni.matches("\\d+")) {
                             System.out.println("❌ Ingrese solo números.");
                         }
@@ -92,27 +102,63 @@ public class Main {
                     System.out.print("Perfil de vivienda: ");
                     String perfil = leerSoloTexto(scanner);
 
-                    ConexionDB.insertarAdoptante(nombreAdoptante, dni, telefono, email, perfil);
+                    AdoptanteService.insertarAdoptante(nombreAdoptante, dni, telefono, email, perfil);
                     break;
-
                 case 5:
-                    ConexionDB.insertarAnimal("Luna", "Perro", "Mestizo", 3, "Hembra", "Buena");
-                    ConexionDB.insertarAnimal("Toby", "Gato", "Siames", 2, "Macho", "Regular");
-                    ConexionDB.insertarAdoptante("Laura Pérez", "40123456", "1123456789", "laura@prueba.com", "Casa con patio");
-                    System.out.println("📦 Datos de ejemplo cargados.");
-                    break;
+                    String dniBusqueda;
+                    boolean adoptanteEncontrado = false;
 
+                    do {
+                        System.out.print("🔎 Ingrese DNI del adoptante (o escriba 'salir' para cancelar): ");
+                        dniBusqueda = scanner.nextLine();
+
+                        if (dniBusqueda.equalsIgnoreCase("salir")) {
+                            System.out.println("🔙 Operación cancelada.");
+                            break;
+                        }
+
+                        if (!dniBusqueda.matches("\\d+")) {
+                            System.out.println("❌ El DNI debe ser numérico.");
+                            continue;
+                        }
+
+                        adoptanteEncontrado = AdoptanteService.existeAdoptantePorDNI(dniBusqueda);
+
+                        if (!adoptanteEncontrado) {
+                            System.out.println("ℹ️ No se encontró un adoptante con ese DNI.");
+                            System.out.print("¿Desea ingresar un nuevo DNI? (s/n): ");
+                            String respuesta = scanner.nextLine();
+                            if (!respuesta.equalsIgnoreCase("s")) {
+                                System.out.println("🔙 Operación cancelada.");
+                                break;
+                            }
+                        }
+
+                    } while (!adoptanteEncontrado);
+
+                    if (adoptanteEncontrado) {
+                        SolicitudAdopcionService.insertarSolicitudYAdopcionPorDNI(dniBusqueda, scanner);
+                    }
+                    break;
                 case 6:
+                    AdopcionService.listarAdopcionesConfirmadas();
+                    break;
+                case 7:
+                    AnimalService.insertarAnimalCompleto("Luna", "Perro", "Mestizo", 3, "Hembra", "Buena", "N/D", "N/D", "Tranquila", "Alta");
+                    AnimalService.insertarAnimalCompleto("Toby", "Gato", "Siames", 2, "Macho", "Regular", "N/D", "N/D", "Juguetón", "Media");
+                    AdoptanteService.insertarAdoptante("Laura Pérez", "40123456", "1123456789", "laura@prueba.com", "Casa con patio");
+                    System.out.println("📦 Datos de ejemplo insertados.");
+                    break;
+                case 8:
                     System.out.println("👋 Gracias por usar SAGA. ¡Hasta pronto!");
                     break;
                 default:
                     System.out.println("❌ Opción inválida. Intente nuevamente.");
             }
 
-        } while (opcion != 6);
+        } while (opcion != 8);
     }
 
-    // Métodos auxiliares de validación
     private static String leerSoloTexto(Scanner scanner) {
         String input;
         do {
@@ -138,6 +184,4 @@ public class Main {
         }
         return numero;
     }
-
-
 }
