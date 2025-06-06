@@ -4,12 +4,12 @@ import java.sql.ResultSet;
 
 public class UsuarioService {
 
-    public static void insertarUsuario(String nombreUsuario, String contraseña, int idRol) {
+    public static void insertarUsuario(String nombreUsuario, String Password, int idRol) {
         try (Connection conn = ConexionDB.conectar()) {
-            String sql = "INSERT INTO Usuario (NombreUsuario, Contraseña, ID_Rol) VALUES (?, ?, ?)";
+            String sql = "INSERT INTO Usuario (NombreUsuario, Password, ID_Rol) VALUES (?, ?, ?)";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, nombreUsuario);
-            ps.setString(2, contraseña); // ⚠️ sin encriptar por ahora
+            ps.setString(2, Password);
             ps.setInt(3, idRol);
             ps.executeUpdate();
             System.out.println("✅ Usuario insertado correctamente.");
